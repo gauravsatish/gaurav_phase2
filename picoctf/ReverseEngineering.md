@@ -138,3 +138,71 @@ None
 
 ## Resources:
 None
+
+***
+
+# 3. ARMssembly 1
+
+> For what argument does this program print `win` with variables `83`, `0` and `3`? File: [chall_1.S](https://mercury.picoctf.net/static/b4fd1dabc9dec63c37180b5b05783b55/chall_1.S) Flag format: picoCTF{XXXXXXXX} -> (hex, lowercase, no 0x, and 32 bits. ex. 5614267 would be picoCTF{0055aabb})
+
+## Solution:
+
+`chall_1.S` is an assembly source file. You can attempt this in multiple ways, but probably the easiest way is to convert it into C code. Putting chall_1.S in an online converter, we get:
+```C
+#include <stdio.h>
+#include <stdlib.h>
+
+int func(int w0) {
+    int var_12 = w0;
+    int var_16 = 83;
+    int var_20 = 0;
+    int var_24 = 3;
+    int var_28;
+
+    var_28 = var_16 << var_20;
+    var_28 = var_28 / var_24;
+    var_28 = var_28 - var_12;
+
+    return var_28;
+}
+
+int main(int argc, char **argv) {
+    int input = atoi(argv[1]);
+    int result = func(input);
+
+    if (result == 0) {
+        puts("You win!");
+    } else {
+        puts("You Lose :(");
+    }
+
+    return 0;
+}
+```
+For us to get our win condition, the function `func` must return 0. Going through the code, `var_12` is our input, `var_16`, `var_20`, `var_24` are integer constants and `var_28` is what we will be returning.
+- `var_28` = `var_16` << `var_20` = 83 << 0 = 83 (left shifting by `0` bits)
+- `var_28` = `var_28` / `var_24` = 83 / 3 = 27
+- `var_28` = `var_28` - `var_12` = 27 - `input`
+- Since `var_28` must be equal to 0, `input`= 27
+- 27 in hex is `1B`, when adjusted to meet the requirements, the flag is:
+## Flag:
+
+```
+picoCTF{0000001b}
+```
+
+## Concepts learnt:
+
+- Converting assembly source files
+
+## Notes:
+
+- None
+
+## Resources:
+
+- [Converter](https://www.codeconvert.ai/assembly-to-c-converter)
+
+
+***
+
