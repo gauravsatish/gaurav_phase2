@@ -222,8 +222,186 @@ FCSC{b1dee4eeadf6c4e60aeb142b0b486344e64b12b40d1046de95c89ba5e23a9925}
 
 # 3. Bare Metal Alchemist
 
-> Description
+> my friend recommended me this anime but i think i've heard a wrong name.
 
-.
-.
-.
+# Solution
+
+Running file on the executable, we see:
+```
+file firmware.elf 
+firmware.elf: ELF 32-bit LSB executable, Atmel AVR 8-bit, version 1 (SYSV), statically linked, with debug_info, not stripped
+```
+After seeing this, I googled Atmel AVR, which seems to be an 8bit microcontroller
+I selected the file in ghidra (you have to set the language to `avr8:LE:16:default`), we can disassemble the program and look at the generated C code.
+In the main function:
+```C
+
+void main(void)
+
+{
+  char cVar1;
+  byte bVar2;
+  char cVar3;
+  undefined2 uStack_5;
+  undefined2 uStack_3;
+  undefined1 uStack_1;
+  
+  R1 = 0;
+  uStack_1 = Y._1_1_;
+  uStack_3 = 0xbe;
+  //Shortened for brevity
+  R13 = '\0';
+  do {
+    R25R24._0_1_ = DAT_mem_0029;
+    R25R24._0_1_ = (byte)R25R24 ^ (byte)R25R24 * '\x02';
+    if (((byte)R25R24 & 4) == 0) {
+      uStack_5 = (undefined *)0x141;
+      z1();
+    }
+    else {
+      R15R14 = (byte *)0x68;
+      R16 = 0;
+      while( true ) {
+        Z = R15R14;
+        R25R24._0_1_ = *R15R14;
+        if ((byte)R25R24 == 0) break;
+        Z._1_1_ = (undefined1)((uint)R15R14 >> 8);
+        Z._0_1_ = (byte)R25R24 ^ R11;
+        if ((byte)R25R24 == 0xa5) break;
+        R25R24._0_1_ = DAT_mem_0029;
+        R25R24._0_1_ = (byte)R25R24 ^ (byte)R25R24 * '\x02';
+        if (((byte)R25R24 & 4) == 0) {
+          uStack_5 = (undefined *)0x131;
+          z1();
+          break;
+        }
+        Z._0_1_ = (byte)Z - 0x30;
+        R17 = 0;
+        if ((byte)Z < 0x4e) {
+          Z = (byte *)CONCAT11(1,(byte)Z);
+          R17 = *Z;
+        }
+        uStack_5 = &DAT_mem_0151;
+        z1();
+        if ((R17 & 1) != 0) {
+          bVar2 = DAT_mem_002b;
+          DAT_mem_002b = bVar2 | 8;
+        }
+        if ((R17 & 2) != 0) {
+          bVar2 = DAT_mem_002b;
+          DAT_mem_002b = bVar2 | 0x10;
+        }
+        if ((R17 & 4) != 0) {
+          bVar2 = DAT_mem_002b;
+          DAT_mem_002b = bVar2 | 0x20;
+        }
+        if ((R17 & 8) != 0) {
+          bVar2 = DAT_mem_002b;
+          DAT_mem_002b = bVar2 | 0x40;
+        }
+        if ((R17 & 0x10) != 0) {
+          bVar2 = DAT_mem_002b;
+          DAT_mem_002b = bVar2 | 0x80;
+        }
+        if ((R17 & 0x20) != 0) {
+          bVar2 = DAT_mem_0025;
+          DAT_mem_0025 = bVar2 | 1;
+        }
+        if ((R17 & 0x40) != 0) {
+          bVar2 = DAT_mem_0025;
+          DAT_mem_0025 = bVar2 | 2;
+        }
+        R25R24._0_1_ = R16 & 0x1f;
+        cVar3 = (byte)R25R24 + 0x2d;
+        while (cVar1 = cVar3 + -1, cVar3 != '\0') {
+          Z = (byte *)0xf9f;
+          do {
+            Z = (byte *)((int)Z + -1);
+            cVar3 = cVar1;
+          } while (Z != (byte *)0x0);
+        }
+        R15R14 = (byte *)CONCAT11(R15R14._1_1_ - (((char)R15R14 != -1) + -1),(char)R15R14 + '\x01');
+        R16 = R16 + 0x25;
+      }
+      *(byte *)(Y + 2) = R1;
+      *(byte *)(Y + 1) = R1;
+      while( true ) {
+        R25R24._0_1_ = *(byte *)(Y + 1);
+        R25R24._1_1_ = *(char *)(Y + 2);
+        if (R25R24._1_1_ != '\0' && ((byte)R25R24 < 0x2c) <= (byte)(R25R24._1_1_ - 1U)) break;
+        R25R24 = *(int *)(Y + 1) + 1;
+        *(char *)(Y + 2) = R25R24._1_1_;
+        *(byte *)(Y + 1) = (byte)R25R24;
+      }
+    }
+    if (R12 != R1 || R13 != (byte)(R1 + (R12 < R1))) {
+      uStack_5 = (undefined *)0x146;
+      __vectors();
+    }
+  } while( true );
+}
+```
+I don't understand half of this, but we can see that there are XOR operations going on, and if previous challenges are to go by, then the flag is being xored. This means that the XORed version of the flag is hardcoded into the executable, and we can bruteforce it by trying to all 256 bytes as the second operand:
+```python
+import re
+
+fw = open("firmware.elf", "rb").read()
+p = re.compile(rb"[A-Za-z0-9_]{1,20}\{[A-Za-z0-9_\-\+\=\/\\\.\s]{10,200}\}")
+
+for i in range(256):
+    print("testing", i)
+    xored = bytes(b ^ i for b in fw)
+    found = p.search(xored)
+    if found:
+        print("=========", found.group().decode(), "=========")
+```
+
+
+```
+testing 0
+testing 1
+testing 2
+testing 3
+testing 4
+testing 5
+testing 6
+testing 7
+testing 8
+testing 9
+testing 10
+testing 11
+========= yjf{dgbenxTneo
+                        TT} =========
+testing 12
+ shortened for brevity
+testing 57
+========= 9mnxtk9mn{k9mnzk9mnjk9mn} =========
+testing 58
+# shortened for brevity
+testing 66
+========= HBB{vBALxIyI
+                      Q} =========
+testing 67
+# shortened for brevity
+testing 107
+========= mzjyjhcpcNcxnkkkjzk{mzjyjhcpcNcxnkkk} =========
+testing 108
+# shortened for brevity
+testing 165
+========= TFCCTF{Th1s_1s_som3_s1mpl3_4rdu1no_f1rmw4re} =========
+testing 166
+# shortened for brevity
+testing 255
+```
+
+# Flag
+```
+TFCCTF{Th1s_1s_som3_s1mpl3_4rdu1no_f1rmw4re}
+```
+
+# Concepts Learnt:
+- Decompile executables made for different machines
+
+# Notes
+- what even was this :(
+

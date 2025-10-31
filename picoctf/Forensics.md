@@ -117,3 +117,66 @@ picoCTF{h1dd3n_1n_pLa1n_51GHT_18375919}
 
 ***
 
+# 3. Tunn3l V1s10n
+
+> We found this [file](https://mercury.picoctf.net/static/01be2b38ba97802285a451b94505ea75/tunn3l_v1s10n). Recover the flag.
+
+## Solution
+
+The first thing I did was runnning `file tunn3l_v1s10n` to get an idea of what we are working with, however it revealed nothing useful.
+Running `exiftool tunn3l_v1s10n`, we see that its a BMP File:
+```
+ExifTool Version Number         : 13.36
+File Name                       : tunn3l_v1s10n
+Directory                       : .
+File Size                       : 2.9 MB
+File Modification Date/Time     : 2021:03:15 23:54:47+05:30
+File Access Date/Time           : 2025:10:31 15:52:36+05:30
+File Inode Change Date/Time     : 2025:10:31 15:52:36+05:30
+File Permissions                : -rw-r--r--
+File Type                       : BMP
+File Type Extension             : bmp
+MIME Type                       : image/bmp
+BMP Version                     : Unknown (53434)
+Image Width                     : 1134
+Image Height                    : 306
+Planes                          : 1
+Bit Depth                       : 24
+Compression                     : None
+Image Length                    : 2893400
+Pixels Per Meter X              : 5669
+Pixels Per Meter Y              : 5669
+Num Colors                      : Use BitDepth
+Num Important Colors            : All
+Red Mask                        : 0x27171a23
+Green Mask                      : 0x20291b1e
+Blue Mask                       : 0x1e212a1d
+Alpha Mask                      : 0x311a1d26
+Color Space                     : Unknown (,5%()
+Rendering Intent                : Unknown (826103054)
+Image Size                      : 1134x306
+Megapixels                      : 0.347
+```
+
+Opening the file doesn't work, so the headers must be corrupted. I downloaded a sample bmp file to help compare the two, and found the specification for the headers:
+![Specs](../screenshots/tunn3lv1s10n1.png)
+
+The first thing i noticed was that `size` field (size of infoheader) was showing a different value from the specification (which mentions 40 bytes). I updated that part to reflect the correct value and opened the image successfully. The aspect ration seemed widely skewed, with the height being very little comparatively. Also, it seemed like certain sections of the image were being cut off and displayed on the other end:
+![Image](../screenshots/tunn3lv1s10n2.png)
+
+The next thing i tried was to make the increase the height and make it a 1:1 aspect ratio image, and lo and behold the flag appeared at the top right:
+![Image](../screenshots/tunn3lv1s10n3.png)
+
+## Flag:
+```
+picoCTF{qu1t3_a_v13w_2020}
+```
+
+## Concepts Learnt:
+
+- Editing hex dumps of files
+- Each file has a specification it must follow to be used by applications correctly.
+
+## Notes:
+
+- Tried messing around with the offset field to no avail. 
