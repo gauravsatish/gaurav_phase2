@@ -1,3 +1,3 @@
 # JTP-2
 
-![Profile](../screenshots/profile.png)
+![Profile](screenshots/profile.png)
