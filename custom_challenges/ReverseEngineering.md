@@ -595,3 +595,680 @@ No flag for this one
 
 - Assembly registers and how they work
 - Debugging, accessing register vars while debugging and more
+
+***
+# 4. Dusty
+
+# Dusty Noob
+
+### Solution:
+The main function decompiled as follows:
+```c
+
+/* shinyclean::main */
+
+void __rustcall shinyclean::main(void)
+
+{
+  int iVar1;
+  ulong uVar2;
+  byte local_de [23];
+  byte local_c7 [23];
+  ulong local_b0;
+  undefined1 local_a8 [48];
+  byte *local_78;
+  code *local_70;
+  byte *local_68;
+  code *local_60;
+  undefined1 local_58 [48];
+  byte *local_28;
+  code *local_20;
+  byte *local_18;
+  code *local_10;
+  byte *local_8;
+  
+  memset(local_de,0,0x17);
+  local_c7[0] = 0x7b;
+  local_c7[1] = 0x5e;
+  local_c7[2] = 0x48;
+  local_c7[3] = 0x58;
+  local_c7[4] = 0x7c;
+  local_c7[5] = 0x6b;
+  local_c7[6] = 0x79;
+  local_c7[7] = 0x44;
+  local_c7[8] = 0x79;
+  local_c7[9] = 0x6d;
+  local_c7[10] = 0xc;
+  local_c7[0xb] = 0xc;
+  local_c7[0xc] = 0x60;
+  local_c7[0xd] = 0x7c;
+  local_c7[0xe] = 0xb;
+  local_c7[0xf] = 0x6d;
+  local_c7[0x10] = 0x60;
+  local_c7[0x11] = 0x68;
+  local_c7[0x12] = 0xb;
+  local_c7[0x13] = 10;
+  local_c7[0x14] = 0x77;
+  local_c7[0x15] = 0x1e;
+  local_c7[0x16] = 0x42;
+  local_b0 = 0;
+  while( true ) {
+    if (0x16 < local_b0) {
+                    /* WARNING: Subroutine does not return */
+      core::panicking::panic_bounds_check(local_b0,0x17,&PTR_DAT_00154578);
+    }
+    if (0x16 < local_b0) {
+                    /* WARNING: Subroutine does not return */
+      core::panicking::panic_bounds_check(local_b0,0x17,&PTR_DAT_00154590);
+    }
+    local_de[local_b0] = local_c7[local_b0] ^ 0x3f;
+    uVar2 = local_b0 + 1;
+    if (0xfffffffffffffffe < local_b0) break;
+    local_b0 = uVar2;
+    if (uVar2 == 0x17) {
+LAB_00107c83:
+      iVar1 = std::process::id();
+      if (iVar1 == 0x1c1e8b2) {
+        local_18 = local_de;
+        local_10 = core::array::_<>::fmt;
+        local_8 = local_de;
+        local_78 = local_de;
+        local_20 = core::array::_<>::fmt;
+        local_60 = core::array::_<>::fmt;
+        local_70 = core::array::_<>::fmt;
+        local_68 = local_78;
+        local_28 = local_78;
+        core::fmt::Arguments::new_v1(local_a8,&DAT_001545c0,&local_78);
+        std::io::stdio::_print(local_a8);
+      }
+      else {
+        core::fmt::Arguments::new_const(local_58,&PTR_DAT_001545e0);
+        std::io::stdio::_print(local_58);
+      }
+      return;
+    }
+  }
+  core::panicking::panic_const::panic_const_add_overflow(&PTR_DAT_001545a8);
+  goto LAB_00107c83;
+}
+```
+From this we can see that this is a rust binary. It's a simple operation where each element in `local_c7` is being XORed with `0x3f`. The actual program checks if the process PID matches a certain number. This is obviously highly unlikely since the kernel assigns a random address to each process. We can just use the bytes stored in the array, XOR them and decode it to print the flag. Since the original program was in rust, I though it fitting to script the solution using the little rust knowledge I have:
+```rust
+fn main() {
+    let mut array = [0; 23];
+    array[0] = 0x7b;
+    array[1] = 0x5e;
+    array[2] = 0x48;
+    array[3] = 0x58;
+    array[4] = 0x7c;
+    array[5] = 0x6b;
+    array[6] = 0x79;
+    array[7] = 0x44;
+    array[8] = 0x79;
+    array[9] = 0x6d;
+    array[10] = 0xc;
+    array[0xb] = 0xc;
+    array[0xc] = 0x60;
+    array[0xd] = 0x7c;
+    array[0xe] = 0xb;
+    array[0xf] = 0x6d;
+    array[0x10] = 0x60;
+    array[0x11] = 0x68;
+    array[0x12] = 0xb;
+    array[0x13] = 10;
+    array[0x14] = 0x77;
+    array[0x15] = 0x1e;
+    array[0x16] = 0x42;
+
+    for i in 0..23 {
+        array[i] = array[i] ^ 0x3f;
+    }
+
+    match std::str::from_utf8(&array) {
+        Ok(s) => { println!("flag: {}", s); }
+        Err(e) => { println!("Error converting to UTF-8: {}", e); }
+    }
+
+    println!("{:?}", array);
+}
+```
+### Flag:
+
+```
+DawgCTF{FR33_C4R_W45H!}
+```
+
+# Dusty Intermediate
+### Solution:
+This was quite a tricky one. In the decompiled main function, we see an array of target bytes:
+```c
+/* shinyclean2::main */
+void __rustcall shinyclean2::main(void) {
+  # Removed for brevity
+  alloc::string::String::new(input);
+  core::fmt::Arguments::new_const(local_1a0,&PTR_DAT_00175ae8);
+  std::io::stdio::_print(local_1a0);
+  local_170 = std::io::stdio::stdin();
+  input_str = std::io::stdio::Stdin::read_line(&local_170,input);
+  core::result::Result<T,E>::expect
+            (input_str._0_8_,input_str._8_8_,&DAT_001613c7,0x13,&PTR_DAT_00175af8);
+  local_29 = 0;
+  local_2a = 0;
+  local_150 = local_228;
+  local_148 = local_220;
+  local_140 = local_1f8;
+  local_138 = local_1f0;
+  std::thread::spawn(&local_168,&local_150);
+  local_2b = 1;
+                    /* try { // try from 0010d690 to 0010d821 has its CatchHandler @ 0010d6c2 */
+  input_str = _<>::deref(input);
+  input_str = core::str::_<impl_str>::bytes(input_str._0_8_,input_str._8_8_);
+  input_iter = _<>::into_iter(input_str._0_8_,input_str._8_8_);
+  while( true ) {
+    input_iter_value = _<>::next(input_iter);
+    input_iter_value = input_iter_value & 1;
+    local_119 = extraout_DL;
+    if (input_iter_value == 0) break;
+    local_1 = extraout_DL;
+    std::sync::mpsc::Sender<T>::send(&local_238);
+  }
+  std::sync::mpsc::Sender<T>::send(&local_238,0);
+  local_2b = 0;
+  local_f8 = local_158;
+  local_108 = local_168;
+  uStack_104 = uStack_164;
+  uStack_100 = uStack_160;
+  uStack_fc = uStack_15c;
+  local_118 = std::thread::JoinHandle<T>::join(&local_108);
+  core::ptr::drop_in_place<>(local_118);
+  alloc::vec::Vec<T>::new(vector);
+  while( true ) {
+                    /* try { // try from 0010d826 to 0010d832 has its CatchHandler @ 0010d84f */
+    local_cb = std::sync::mpsc::Receiver<T>::recv(&local_1e8);
+    local_cb = local_cb & 1;
+    local_ca = extraout_DL_00;
+    if (local_cb != 0) break;
+                    /* try { // try from 0010d8a2 to 0010da64 has its CatchHandler @ 0010d84f */
+    local_11 = extraout_DL_00;
+    alloc::vec::Vec<T,A>::push(vector);
+  }
+  win_condition = 1;
+  vector_length = alloc::vec::Vec<T,A>::len(vector);
+  vector_length_iter = _<>::into_iter(0,vector_length);
+  do {
+    input_str = core::iter::range::_<>::next(vector_length_iter);
+    vector_length_iter_value = input_str._8_8_;
+    if (input_str._0_8_ == 0) goto LAB_0010d944;
+    local_10 = vector_length_iter_value;
+    if (0x15 < vector_length_iter_value) {
+      win_condition = 0;
+      goto LAB_0010d944;
+    }
+    local_a5[0] = -0x16;
+    local_a5[1] = -0x27;
+    local_a5[2] = '1';
+    local_a5[3] = '\"';
+    local_a5[4] = -0x2d;
+    local_a5[5] = -0x1a;
+    local_a5[6] = -0x69;
+    local_a5[7] = 'p';
+    local_a5[8] = '\x16';
+    local_a5[9] = -0x5e;
+    local_a5[10] = -0x58;
+    local_a5[0xb] = '\x1b';
+    local_a5[0xc] = 'a';
+    local_a5[0xd] = -4;
+    local_a5[0xe] = 'v';
+    local_a5[0xf] = 'h';
+    local_a5[0x10] = '{';
+    local_a5[0x11] = -0x55;
+    local_a5[0x12] = -0x48;
+    local_a5[0x13] = '\'';
+    local_a5[0x14] = 0x96;
+    local_b8 = input_str;
+    if (0x14 < vector_length_iter_value) {
+                    /* WARNING: Subroutine does not return */
+      core::panicking::panic_bounds_check(vector_length_iter_value,0x15,&PTR_DAT_00175b10);
+    }
+    cVar1 = local_a5[vector_length_iter_value];
+    pcVar2 = (char *)_<>::index(vector,vector_length_iter_value,&PTR_DAT_00175b28);
+  } while (cVar1 == *pcVar2);
+  win_condition = 0;
+  input_str = local_b8;
+LAB_0010d944:
+  local_b8 = input_str;
+  if ((win_condition & 1) == 0) {
+    core::fmt::Arguments::new_const(local_60,&PTR_s_Loser!_Try_again?_00175b40);
+    std::io::stdio::_print(local_60);
+  }
+  else {
+    core::fmt::Arguments::new_const
+              (local_a5 + 0x15,&PTR_s_You_win!_May_you_be_Rust_clean_f_00175b50);
+                    /* try { // try from 0010da78 to 0010da88 has its CatchHandler @ 0010d84f */
+    std::io::stdio::_print(local_a5 + 0x15);
+  }
+                    /* try { // try from 0010da69 to 0010da75 has its CatchHandler @ 0010d6c2 */
+  core::ptr::drop_in_place<>(vector);
+  local_2b = 0;
+                    /* try { // try from 0010da95 to 0010daa1 has its CatchHandler @ 0010d545 */
+  core::ptr::drop_in_place<>(input);
+                    /* try { // try from 0010daa4 to 0010dab0 has its CatchHandler @ 0010dac2 */
+  core::ptr::drop_in_place<>(&local_1e8);
+  local_2a = 0;
+  local_29 = 0;
+  core::ptr::drop_in_place<>(&local_238);
+  return;
+}
+```
+
+We take in user input and convert that string into bytes, then iterate over it. We send each byte to the spawned thread via a channel.
+Next, we create a `vec!` and start an infinite loop. Inside this loop, we receive values from the spawned thread and we push the received byte to the vector.
+Next, we have another loop that iterates from `0..vector_length`. Inside this loop, we have some hardcoded constants stored in `local_a5` (the target bytes). If the vector length reaches 21 (`0x15`) or more, we lose because the win condition gets set to zero. the loop compares each element of our vector against the hardcoded target bytes in `local_a5`. If **any** byte doesn't match, the win condition is set to 0 and we lose. Only if the vector is exactly 21 bytes long **and** every single byte matches the corresponding target byte do we win.
+
+To find the thread function, I searched for references to the `send` function, which sends messages back and forth between threads.
+The thread function (some variables have been renamed):
+```c
+
+/* shinyclean2::a */
+
+void __rustcall
+shinyclean2::a(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4) {
+  # Shortened for brevity
+  
+  local_121 = 0x75;
+  counter = 0;
+  local_148 = param_1;
+  local_140 = param_2;
+  local_138 = param_3;
+  local_130 = param_4;
+  do {
+                    /* try { // try from 0010d268 to 0010d271 has its CatchHandler @ 0010d28b */
+    local_11c = std::sync::mpsc::Receiver<T>::recv(&local_148);
+    local_11c = local_11c & 1;
+    value = extraout_DL;
+    if (local_11c != 0) {
+LAB_0010d2d8:
+                    /* try { // try from 0010d2d8 to 0010d2f0 has its CatchHandler @ 0010d3d8 */
+      core::ptr::drop_in_place<>(&local_138);
+      core::ptr::drop_in_place<>(&local_148);
+      return;
+    }
+    bVar2 = local_11a;
+    value_cpy = extraout_DL;
+    if (extraout_DL == '\0') break;
+                    /* try { // try from 0010d2f6 to 0010d306 has its CatchHandler @ 0010d28b */
+    _<>::add_assign(&local_121,extraout_DL);
+    memcpy(lookup_table,&DAT_00161298,0x100);
+    uVar4 = (ulong)local_121;
+    if (0xff < uVar4) {
+                    /* WARNING: Subroutine does not return */
+      core::panicking::panic_bounds_check(uVar4,0x100,&PTR_DAT_00175ab8);
+    }
+                    /* try { // try from 0010d33b to 0010d3c9 has its CatchHandler @ 0010d28b */
+    local_11a = std::sync::mpsc::Sender<T>::send(&local_138,lookup_table[uVar4]);
+    local_11a = local_11a & 1;
+    local_119 = extraout_DL_00;
+    if (local_11a != 0) goto LAB_0010d2d8;
+    iVar3 = counter + 1;
+    if (SCARRY4(counter,1)) {
+      core::panicking::panic_const::panic_const_add_overflow(&PTR_DAT_00175ad0);
+                    /* WARNING: Does not return */
+      pcVar1 = (code *)invalidInstructionException();
+      (*pcVar1)();
+    }
+    counter = iVar3;
+    bVar2 = 0;
+  } while (iVar3 != 0x15);
+  local_11a = bVar2;
+  core::ptr::drop_in_place<>(&local_138);
+  core::ptr::drop_in_place<>(&local_148);
+  return;
+}
+```
+
+The thread does the following:
+- it has an accumulator, which starts at byte `0x75`.
+- whatever byte we receive is added to this accumulator (the accumulator is an unsigned byte, so it overflows and resets to 0 when crossing 256)
+- It loads a lookup table, and returns whatever value corresponding to the accumulator as index.
+
+I found the lookup table in the disassembly, then using neovim's block select and macros, cleaned it up and pasted it into my solve script.
+Then following the logic, I created the rest of the solve script:
+```python
+lookup_table = [
+    0x9F, 0xD2, 0xD6, 0xA8, 0x99, 0x76, 0xB8, 0x75, 0xE2, 0x0E, 0x50, 0x67, 0xC9, 0x3A, 0xA0, 0xB5,
+    0x15, 0xEE, 0x59, 0xBE, 0x7D, 0xA3, 0xFB, 0x51, 0xDF, 0x7C, 0xD9, 0x0D, 0xE7, 0x2D, 0xAD, 0x28,
+    0xED, 0xDC, 0x3D, 0x14, 0x13, 0x79, 0xAF, 0x27, 0xD1, 0xD5, 0xA1, 0xF9, 0x37, 0xC0, 0xEF, 0x25,
+    0x38, 0x77, 0xFF, 0x1B, 0x40, 0x60, 0x8F, 0x45, 0x6F, 0x08, 0x6D, 0xD3, 0x35, 0x3F, 0xB4, 0x2F,
+    0xD7, 0x34, 0x5F, 0x05, 0xBB, 0x11, 0x3E, 0x84, 0x5B, 0x00, 0xF5, 0x29, 0x36, 0x2C, 0x63, 0x2B,
+    0x70, 0x68, 0x02, 0xAE, 0xC4, 0x95, 0x10, 0x89, 0xB0, 0x2E, 0x55, 0xCC, 0xBC, 0x80, 0xA6, 0xF3,
+    0xD8, 0x5A, 0x62, 0x61, 0x9A, 0xA5, 0xFE, 0x3C, 0xB2, 0x7E, 0xBF, 0xA7, 0xEB, 0x41, 0x7A, 0xFA,
+    0x53, 0x47, 0xDD, 0x6B, 0x54, 0x65, 0x9D, 0x0B, 0x73, 0x94, 0x81, 0x1D, 0x4C, 0xAC, 0x46, 0xDE,
+    0x43, 0x9C, 0xFD, 0x7F, 0x6A, 0x7B, 0x07, 0x01, 0xF7, 0xE5, 0xB3, 0xCD, 0x1F, 0xC7, 0x58, 0xE6,
+    0x4D, 0x31, 0x4A, 0xD0, 0x98, 0x93, 0x20, 0xC5, 0x1E, 0x6C, 0x8C, 0x09, 0x78, 0xBD, 0x03, 0x23,
+    0x82, 0xDB, 0x12, 0x16, 0x96, 0xC8, 0xCE, 0xF4, 0xE0, 0xA4, 0x04, 0xCA, 0x49, 0x87, 0xC2, 0x32,
+    0x6E, 0xF1, 0x39, 0x1C, 0x85, 0x5E, 0x92, 0xF8, 0xAB, 0xEA, 0x8D, 0xC1, 0x86, 0x17, 0x8A, 0xB1,
+    0xF2, 0x4F, 0xFC, 0xE1, 0xCB, 0xB6, 0x42, 0xBA, 0xA9, 0x88, 0x66, 0x4E, 0x18, 0xF6, 0x64, 0xAA,
+    0x2A, 0x8B, 0xF0, 0xA2, 0xEC, 0x97, 0x5C, 0xE3, 0xCF, 0x91, 0x0C, 0x1A, 0x30, 0x5D, 0x69, 0x56,
+    0xE4, 0x9B, 0x0F, 0x90, 0xC6, 0x72, 0x48, 0x06, 0x33, 0x9E, 0x0A, 0x83, 0x8E, 0x52, 0x19, 0xE8,
+    0x44, 0xDA, 0x26, 0xD4, 0x3B, 0x4B, 0x74, 0x24, 0x22, 0xB7, 0xC3, 0x21, 0xE9, 0xB9, 0x71, 0x57,
+]
+
+required_bytes = [
+    -0x16, -0x27, '1', '\"', -0x2d, -0x1a, -0x69, 'p', 
+    '\x16', -0x5e, -0x58, '\x1b', 'a', -4, 'v', 'h', 
+    '{', -0x55, -0x48, '\'', 0x96,
+]
+
+for i, byte in enumerate(required_bytes):
+    if type(byte) == int:
+        required_bytes[i] = byte & 0xFF
+    else:
+        required_bytes[i] = ord(byte) & 0xFF
+
+index = 0x75
+flag = b""
+
+for req in required_bytes:
+    target_index = lookup_table.index(req)
+    byte = (target_index - index) & 0xFF  
+    flag += byte.to_bytes()
+    index = (index + byte) & 0xFF
+
+print(flag)
+print(flag.decode())
+```
+
+From this, we find the flag:
+
+### Flag:
+```
+DawgCTF{S0000_CL43N!}
+```
+
+# Dusty Pro
+
+### Solution:
+The decompiled main function:
+```c
+/* shinyclean2::main */
+void __rustcall shinyclean2::main(void) {
+  # Shortened for brevity
+  
+  ptr_to_DAT = &DAT_0015b134;
+  var_winitial_0x40 = 0x40;
+  table[0] = 0xcf;
+  table[1] = 9;
+  table[2] = 0x1e;
+  table[3] = 0xb3;
+  table[4] = 200;
+  table[5] = 0x3c;
+  table[6] = 0x2f;
+  table[7] = 0xaf;
+  table[8] = 0xbf;
+  table[9] = 0x24;
+  table[10] = 0x25;
+  table[0xb] = 0x8b;
+  table[0xc] = 0xd9;
+  table[0xd] = 0x3d;
+  table[0xe] = 0x5c;
+  table[0xf] = 0xe3;
+  table[0x10] = 0xd4;
+  table[0x11] = 0x26;
+  table[0x12] = 0x59;
+  table[0x13] = 0x8b;
+  table[0x14] = 200;
+  table[0x15] = 0x5c;
+  table[0x16] = 0x3b;
+  table[0x17] = 0xf5;
+  table[0x18] = 0xf6;
+  core::fmt::Arguments::new_const(table + 0x19,&PTR_DAT_0016e870);
+  std::io::stdio::_print(table + 0x19);
+  alloc::string::String::new(local_168);
+                    /* try { // try from 00109728 to 00109730 has its CatchHandler @ 00109751 */
+  local_150 = std::io::stdio::stdin();
+                    /* try { // try from 00109777 to 0010991f has its CatchHandler @ 00109751 */
+  iter_value = std::io::stdio::Stdin::read_line(&local_150,local_168);
+  core::result::Result<T,E>::expect
+            (iter_value._0_8_,iter_value._8_8_,"Failed to read line",0x13,
+             &PTR_s_src/main.rs_0016e880);
+  iter_value = _<>::deref(local_168);
+  iter_value = core::str::_<impl_str>::trim(iter_value._0_8_,iter_value._8_8_);
+  local_140 = core::str::_<impl_str>::parse(iter_value._0_8_,iter_value._8_8_);
+  local_48 = local_140;
+  local_40 = local_140;
+  input = core::result::Result<T,E>::expect
+                    (local_140,"Invalid int!",0xc,&PTR_s_src/main.rs_0016e898);
+  input_bytes = core::num::_<impl_u32>::to_ne_bytes(input);
+  input_bytes_cpy = input_bytes;
+  iter24 = _<>::into_iter(0,0x19);
+  while( true ) {
+    iter_value = core::iter::range::_<>::next(iter24);
+    actual_iter_value = iter_value._8_8_;
+    local_128 = iter_value;
+    if (iter_value._0_8_ == 0) {
+      sha256::digest(local_118,table);
+                    /* try { // try from 0010993c to 00109950 has its CatchHandler @ 0010996d */
+      bVar1 = _<>::eq(local_118,&ptr_to_DAT);
+      if ((bVar1 & 1) == 0) {
+                    /* try { // try from 0010998d to 001099d7 has its CatchHandler @ 0010996d */
+        core::fmt::Arguments::new_const(local_88,&PTR_s_Sorry,_better_luck_next_time!_0016e8b0);
+        std::io::stdio::_print(local_88);
+      }
+      else {
+        core::str::converts::from_utf8(local_f0,table,0x19);
+                    /* try { // try from 001099f2 to 00109ae8 has its CatchHandler @ 0010996d */
+        local_100 = core::result::Result<T,E>::expect
+                              (local_f0,"Failed to Parse",0xf,&PTR_s_src/main.rs_0016e8c0);
+        local_18 = local_100;
+        local_10 = _<>::fmt;
+        local_8 = local_100;
+        local_98 = local_100;
+        local_20 = _<>::fmt;
+        pcStack_90 = _<>::fmt;
+        uStack_a0 = 0x109e20;
+        uStack_9c = 0;
+        local_28 = local_98;
+        local_a8 = local_98;
+        core::fmt::Arguments::new_v1(local_d8,&PTR_s_Congratulations!_You_win_a_0016e8d8,&local_a8);
+        std::io::stdio::_print(local_d8);
+      }
+                    /* try { // try from 001099dc to 001099ec has its CatchHandler @ 00109751 */
+      core::ptr::drop_in_place<>(local_118);
+      core::ptr::drop_in_place<>(local_168);
+      return;
+    }
+    local_30 = actual_iter_value;
+    uVar2 = actual_iter_value & 3;
+    if (3 < uVar2) break;
+    if (0x18 < actual_iter_value) {
+                    /* WARNING: Subroutine does not return */
+      core::panicking::panic_bounds_check(actual_iter_value,0x19,&PTR_s_src/main.rs_0016e910);
+    }
+    table[actual_iter_value] = *(byte *)((long)&input_bytes + uVar2) ^ table[actual_iter_value];
+  }
+                    /* try { // try from 00109b40 to 00109b93 has its CatchHandler @ 00109751 */
+                    /* WARNING: Subroutine does not return */
+  core::panicking::panic_bounds_check(uVar2,4,&PTR_s_src/main.rs_0016e8f8);
+}
+```
+
+So, the program takes in a line of user input, parses it as an integer and converts it into bytes. Then we start a loop to modify the table values using XOR. The way the loop works is, it iterates from `0..0x19`, where `i` stores the current iteration.
+This `i` will decide which index of the table will be XORed. next, we have `j = i & 3`. This is equivalent to `i mod 4`, meaning j will iterate from 0 to 3. This `j` will decide which byte of the input integer will be used to XOR the table value (The code does `table[i] ^= input_bytes[j];`)
+
+At the end, the table is hashed and checked with the hardcoded hash value, if they are the same, the flag is printed.
+
+Now normally, if we didn't know what the flag format was, the only real option would have been to bruteforce the values. But since we know that the flag starts with `DawgCTF{`, we can deduce the 4 bytes of the input integer. I made a script to do so:
+```python
+table = [0] * 0x19
+table[0] = 0xcf
+table[1] = 9
+table[2] = 0x1e
+table[3] = 0xb3
+table[4] = 200
+table[5] = 0x3c
+table[6] = 0x2f
+table[7] = 0xaf
+table[8] = 0xbf
+table[9] = 0x24
+table[10] = 0x25
+table[0xb] = 0x8b
+table[0xc] = 0xd9
+table[0xd] = 0x3d
+table[0xe] = 0x5c
+table[0xf] = 0xe3
+table[0x10] = 0xd4
+table[0x11] = 0x26
+table[0x12] = 0x59
+table[0x13] = 0x8b
+table[0x14] = 200
+table[0x15] = 0x5c
+table[0x16] = 0x3b
+table[0x17] = 0xf5
+table[0x18] = 0xf6
+
+flag = b'DawgCTF{'
+input_bytes = [0, 0, 0, 0]
+for i in range(4):
+    input_bytes[i] = table[i] ^ flag[i]
+
+input = int.from_bytes(input_bytes, byteorder='little')
+print(input)
+```
+
+This gives is the input integer, `3563677835`, and now running the binary:
+```console
+./dust_pro 
+Enter your ShinyClean™ code below:
+3563677835
+Congratulations! You win a DawgCTF{4LL_RU57_N0_C4R!}
+```
+
+### Flag:
+```
+DawgCTF{4LL_RU57_N0_C4R!}
+```
+***
+
+# 5. Verdis Quo
+
+## Solution:
+
+I first decompiled the apk using JADX. Looking at `byuctf.downwiththefrench.MainActivity`, we see:
+```java
+/* loaded from: classes3.dex */  
+public class MainActivity extends AppCompatActivity {  
+    @Override // androidx.fragment.app.FragmentActivity, androidx.activity.ComponentActivity, androidx.core.app.ComponentActivity, android.app.Activity  
+    protected void onCreate(Bundle savedInstanceState) {  
+        super.onCreate(savedInstanceState);  
+        setContentView(R.layout.activity_main);  
+        Utilities util = new Utilities(this);  
+        util.cleanUp();  
+        TextView homeText = (TextView) findViewById(R.id.homeText);  
+        homeText.setText("Too slow!!");  
+    }  
+}
+```
+The `Utilities` class contains:
+```java
+package byuctf.downwiththefrench;  
+  
+import android.app.Activity;  
+import android.widget.TextView;  
+  
+/* loaded from: classes3.dex */  
+public class Utilities {  
+    private Activity activity;  
+  
+    public Utilities(Activity activity) {  
+        this.activity = activity;  
+    }  
+  
+    public void cleanUp() {  
+        TextView flag = (TextView) this.activity.findViewById(R.id.flagPart1);  
+        flag.setText("");  
+        TextView flag2 = (TextView) this.activity.findViewById(R.id.flagPart2);  
+        flag2.setText("");  
+        TextView flag3 = (TextView) this.activity.findViewById(R.id.flagPart3);  
+        flag3.setText("");  
+        TextView flag4 = (TextView) this.activity.findViewById(R.id.flagPart4);  
+        flag4.setText("");  
+        TextView flag5 = (TextView) this.activity.findViewById(R.id.flagPart5);  
+        flag5.setText("");  
+        TextView flag6 = (TextView) this.activity.findViewById(R.id.flagPart6);  
+        flag6.setText("");  
+        TextView flag7 = (TextView) this.activity.findViewById(R.id.flagPart7);  
+        flag7.setText("");  
+        TextView flag8 = (TextView) this.activity.findViewById(R.id.flagPart8);  
+        flag8.setText("");  
+        TextView flag9 = (TextView) this.activity.findViewById(R.id.flagPart9);  
+        flag9.setText("");  
+        TextView flag10 = (TextView) this.activity.findViewById(R.id.flagPart10);  
+        flag10.setText("");  
+        TextView flag11 = (TextView) this.activity.findViewById(R.id.flagPart11);  
+        flag11.setText("");  
+        TextView flag12 = (TextView) this.activity.findViewById(R.id.flagPart12);  
+        flag12.setText("");  
+        TextView flag13 = (TextView) this.activity.findViewById(R.id.flagPart13);  
+        flag13.setText("");  
+        TextView flag14 = (TextView) this.activity.findViewById(R.id.flagPart14);  
+        flag14.setText("");  
+        TextView flag15 = (TextView) this.activity.findViewById(R.id.flagPart15);  
+        flag15.setText("");  
+        TextView flag16 = (TextView) this.activity.findViewById(R.id.flagPart16);  
+        flag16.setText("");  
+        TextView flag17 = (TextView) this.activity.findViewById(R.id.flagPart17);  
+        flag17.setText("");  
+        TextView flag18 = (TextView) this.activity.findViewById(R.id.flagPart18);  
+        flag18.setText("");  
+        TextView flag19 = (TextView) this.activity.findViewById(R.id.flagPart19);  
+        flag19.setText("");  
+        TextView flag20 = (TextView) this.activity.findViewById(R.id.flagPart20);  
+        flag20.setText("");  
+        TextView flag21 = (TextView) this.activity.findViewById(R.id.flagPart21);  
+        flag21.setText("");  
+        TextView flag22 = (TextView) this.activity.findViewById(R.id.flagPart22);  
+        flag22.setText("");  
+        TextView flag23 = (TextView) this.activity.findViewById(R.id.flagPart23);  
+        flag23.setText("");  
+        TextView flag24 = (TextView) this.activity.findViewById(R.id.flagPart24);  
+        flag24.setText("");  
+        TextView flag25 = (TextView) this.activity.findViewById(R.id.flagPart25);  
+        flag25.setText("");  
+        TextView flag26 = (TextView) this.activity.findViewById(R.id.flagPart26);  
+        flag26.setText("");  
+        TextView flag27 = (TextView) this.activity.findViewById(R.id.flagPart27);  
+        flag27.setText("");  
+        TextView flag28 = (TextView) this.activity.findViewById(R.id.flagPart28);  
+        flag28.setText("");  
+    }  
+}
+```
+So it looks like the `cleanUp` function is stripping the flag from `MainActivity`'s layout `.xml` file.
+
+I tried using various online Android XML visualizers, but none of them seemed to work, and my refusal to install Android Studio led me to patching the apk using `apktool d VeridisQuo.apk -o patch`
+Then in `patch/smali_classes3/byuctf/downwiththefrench/Mainctivity.smali`, we can simply replace the call to the `clean` function with a `nop` (no operation instruction)
+Then we repackage it into an apk using `apktool b patch -o VeridisQuo-patched.apk`.
+We also have to sign the apk since Android does not allow installing unsigned apks. I used the AUR package `uber-apk-signer-bin` which allows you to sign apks using a debug certificate, so you don't have to bother with setting up any keys:
+`uber-apk-signer --apks VeridisQuo-patched.apk`
+This produces `VeridisQuo-patched-aligned-debugSigned.apk`, which I sent to my phone and installed, from where I was able to see the flag.
+
+![VerdisQuo1](../screenshots/VerdisQuo1.png)
+
+
+## Flag:
+
+```
+byuctf{android_piece_0f_c4ke}
+```
+
+## Concepts learnt:
+
+- Reverse engineering Android APKs
+
+## Notes:
+
+- I do not like Android Studio
+
+
+***
+
